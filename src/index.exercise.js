@@ -7,3 +7,21 @@
 
 // 🐨 use createRoot to render the <App /> to the root element
 // 💰 find the root element with: document.getElementById('root')
+
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { Logo } from 'components/logo'
+
+function App(){
+    return(
+        <div>
+            <Logo width='40' height='40'/>
+            <h1>Bookshelf</h1>
+            <button>Login</button>
+            <button>Register</button>
+        </div>
+    )
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)

@@ -8,6 +8,9 @@ import {AuthenticatedApp} from './authenticated-app'
 import {UnauthenticatedApp} from './unauthenticated-app'
 
 import {client} from './utils/api-client'
+import {useAsync} from './utils/hooks'
+import * as colors from './styles/colors'
+import {FullPageSpinner} from './components/lib'
 
 async function getUser() {
   let user = null
@@ -21,31 +24,54 @@ async function getUser() {
   return user
 }
 
-
 function App() {
   // 🐨 useState for the user
-  const [user, setUser] = React.useState(null)
+  // const [user, setUser] = React.useState(null)
+  const {
+    data: user,
+    error,
+    isIdle,
+    isLoading,
+    isSuccess,
+    isError,
+    run,
+    setData,
+  } = useAsync()
 
   // 🐨 create a login function that calls auth.login then sets the user
   React.useEffect(() => {
-    getUser().then(u => setUser(u))
-  }, [])
+    run(getUser())
+  }, [run])
 
-  const login = form => auth.login(form).then(u => setUser(u))
-  const register = form => auth.register(form).then(u => setUser(u))
+  const login = form => auth.login(form).then(user => setData(user))
+  const register = form => auth.register(form).then(user => setData(user))
   const logout = () => {
     auth.logout()
-    setUser(null)
+    setData(null)
   }
 
-  // 🐨 if there's a user, then render the AuthenticatedApp with the user and logout
-  // 🐨 if there's not a user, then render the UnauthenticatedApp with login and register
+  if (isLoading || isIdle) {
+    return <FullPageSpinner />
+  }
 
-  return user ? (
-    <AuthenticatedApp user={user} logout={logout} />
-  ) : (
-    <UnauthenticatedApp login={login} register={register} />
-  )
+  if (isError) {
+    return (
+      <div>
+        <p>...theres a problem, try refreshing the app</p>
+        <pre>{error.message}</pre>
+      </div>
+    )
+  }
+
+  if (isSuccess) {
+    // 🐨 if there's a user, then render the AuthenticatedApp with the user and logout
+    // 🐨 if there's not a user, then render the UnauthenticatedApp with login and register
+    return user ? (
+      <AuthenticatedApp user={user} logout={logout} />
+    ) : (
+      <UnauthenticatedApp login={login} register={register} />
+    )
+  }
 }
 
 export {App}

@@ -4,10 +4,11 @@ import {jsx} from '@emotion/core'
 import React from 'react'
 import './bootstrap'
 import Tooltip from '@reach/tooltip'
-import {FaSearch} from 'react-icons/fa'
+import {FaSearch, FaTimes} from 'react-icons/fa'
 import {Input, BookListUL, Spinner} from './components/lib'
 import {BookRow} from './components/book-row'
 import {client} from './utils/api-client'
+import * as colors from './styles/colors'
 
 function DiscoverBooksScreen() {
   // const [searchTerm, setSearchTerm] = React.useState('')
@@ -15,6 +16,7 @@ function DiscoverBooksScreen() {
   const [query, setQuery] = React.useState('')
   const [status, setStatus] = React.useState('idle')
   const [data, setData] = React.useState(null)
+  const [error, setError] = React.useState( )
 
   React.useEffect(() => {
     if (!queried) {
@@ -22,15 +24,22 @@ function DiscoverBooksScreen() {
     }
 
     setStatus('loading')
-    client(`books?query=${encodeURIComponent(query)}`)
-      .then(data => {
+    client(`books?query=${encodeURIComponent(query)}`).then(
+      data => {
         setData(data)
         setStatus('success')
-      })
+      },
+      errorData => {
+        setError(errorData)
+        setStatus('error')
+      },
+    )
   }, [queried, query])
 
   const isLoading = status === 'loading'
   const isSuccess = status === 'success'
+  const isError = status === 'error'
+
   function handleSearchSubmit(event) {
     event.preventDefault()
     setQuery(event.target.elements.search.value)
@@ -47,6 +56,7 @@ function DiscoverBooksScreen() {
           id="search"
           css={{width: '100%'}}
         />
+
         <Tooltip label="Search Books">
           <label htmlFor="search">
             <button
@@ -58,11 +68,19 @@ function DiscoverBooksScreen() {
                 background: 'transparent',
               }}
             >
-              {isLoading ? <Spinner /> : <FaSearch aria-label="search" />}
+              {isLoading ? <Spinner /> : isError? <FaTimes aria-label="error" css={{color: colors.danger}} />: <FaSearch aria-label="search" />}
             </button>
           </label>
         </Tooltip>
       </form>
+      {
+  isError ? (
+    <div css={{color: colors.danger}}>
+      <p>There was an error:</p>
+      <pre>{error.message}</pre>
+    </div>
+  ) : null
+}
 
       {isSuccess ? (
         data?.books?.length ? (

@@ -7,14 +7,13 @@ import Tooltip from '@reach/tooltip'
 import {FaSearch} from 'react-icons/fa'
 import {Input, BookListUL, Spinner} from './components/lib'
 import {BookRow} from './components/book-row'
-import client from './utils/api-client'
+import {client} from './utils/api-client'
 
 function DiscoverBooksScreen() {
-  const [searchTerm, setSearchTerm] = React.useState('')
+  // const [searchTerm, setSearchTerm] = React.useState('')
   const [queried, setQueried] = React.useState(false)
   const [query, setQuery] = React.useState('')
   const [status, setStatus] = React.useState('idle')
-
   const [data, setData] = React.useState(null)
 
   React.useEffect(() => {
@@ -23,18 +22,12 @@ function DiscoverBooksScreen() {
     }
 
     setStatus('loading')
-    window
-      .fetch(
-        `${process.env.REACT_APP_API_URL}/books?query=${encodeURIComponent(
-          searchTerm,
-        )}`,
-      )
-      .then(res => res.json())
+    client(`books?query=${encodeURIComponent(query)}`)
       .then(data => {
         setData(data)
         setStatus('success')
       })
-  }, [queried, query, searchTerm])
+  }, [queried, query])
 
   const isLoading = status === 'loading'
   const isSuccess = status === 'success'

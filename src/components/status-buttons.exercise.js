@@ -83,7 +83,7 @@ function StatusButtons({user, book}) {
     updates =>
       client(`list-items/${updates.id}`, {
         method: 'PUT',
-        data: update,
+        data: updates,
         token: user.token,
       }),
     {onSettled: () => queryCache.invalidateQueries('list-items')},
